@@ -1,4 +1,5 @@
 package iestrassierra.jlcamunas.trasstarea.formas;
+// Clase GameThread
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.view.SurfaceHolder;
@@ -6,32 +7,40 @@ import android.view.SurfaceHolder;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class HilosFormas extends Thread {
-    private ArrayList<Formas> formas;
+// Clase GameThread
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.view.SurfaceHolder;
+
+import java.util.ArrayList;
+import java.util.Random;
+
+public class GameThread extends Thread {
+    private ArrayList<Shape> shapes;
     private SurfaceHolder surfaceHolder;
     private boolean running = true;
 
-    public HilosFormas(SurfaceHolder surfaceHolder) {
+    public GameThread(SurfaceHolder surfaceHolder) {
         this.surfaceHolder = surfaceHolder;
-        formas = new ArrayList<>();
+        shapes = new ArrayList<>();
 
         // Crea 3 círculos, 3 cuadrados, 3 triángulos y 3 estrellas
         for (int i = 0; i < 3; i++) {
-            formas.add(new Formas(getRandomX(surfaceHolder.getSurfaceFrame().right),
+            shapes.add(new Shape(getRandomX(surfaceHolder.getSurfaceFrame().right),
                     getRandomY(surfaceHolder.getSurfaceFrame().bottom),
-                    5 + new Random().nextFloat() * 10, Formas.CIRCULO,
+                    5 + new Random().nextFloat() * 10, Shape.CIRCLE,
                     2 + new Random().nextFloat() * 5)); // Velocidad de rotación entre 2 y 7 grados por iteración
-            formas.add(new Formas(getRandomX(surfaceHolder.getSurfaceFrame().right),
+            shapes.add(new Shape(getRandomX(surfaceHolder.getSurfaceFrame().right),
                     getRandomY(surfaceHolder.getSurfaceFrame().bottom),
-                    5 + new Random().nextFloat() * 10, Formas.CUADRADO,
+                    5 + new Random().nextFloat() * 10, Shape.SQUARE,
                     2 + new Random().nextFloat() * 5));
-            formas.add(new Formas(getRandomX(surfaceHolder.getSurfaceFrame().right),
+            shapes.add(new Shape(getRandomX(surfaceHolder.getSurfaceFrame().right),
                     getRandomY(surfaceHolder.getSurfaceFrame().bottom),
-                    5 + new Random().nextFloat() * 10, Formas.TRIANGULO,
+                    5 + new Random().nextFloat() * 10, Shape.TRIANGLE,
                     2 + new Random().nextFloat() * 5));
-            formas.add(new Formas(getRandomX(surfaceHolder.getSurfaceFrame().right),
+            shapes.add(new Shape(getRandomX(surfaceHolder.getSurfaceFrame().right),
                     getRandomY(surfaceHolder.getSurfaceFrame().bottom),
-                    5 + new Random().nextFloat() * 10, Formas.ESTRELLA,
+                    5 + new Random().nextFloat() * 10, Shape.STAR,
                     2 + new Random().nextFloat() * 5));
         }
     }
@@ -65,7 +74,7 @@ public class HilosFormas extends Thread {
     }
 
     private void update() {
-        for (Formas shape : formas) {
+        for (Shape shape : shapes) {
             // Actualiza la posición y la rotación de cada forma y maneja los rebotes
             shape.update(surfaceHolder.getSurfaceFrame().right, surfaceHolder.getSurfaceFrame().bottom);
         }
@@ -75,8 +84,8 @@ public class HilosFormas extends Thread {
         canvas.drawColor(Color.WHITE);
 
         // Dibuja todas las formas en la pantalla
-        for (Formas shape : formas) {
-            shape.dibujar(canvas);
+        for (Shape shape : shapes) {
+            shape.draw(canvas);
         }
     }
 

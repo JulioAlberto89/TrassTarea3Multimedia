@@ -9,21 +9,31 @@ import android.util.DisplayMetrics;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 import iestrassierra.jlcamunas.trasstarea.R;
-import iestrassierra.jlcamunas.trasstarea.formas.HilosFormas;
+import iestrassierra.jlcamunas.trasstarea.formas.GameThread;
 
 
 public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback{
 
     private SharedPreferences sharedPreferences;
-    private HilosFormas hilosFormas;
-    private SurfaceView surfaceView;
+    private GameThread gameThread;
+    private Executor executor;
+    private TextView eslogan;
+    private ImageView logotipo;
+    private Button btEmpezar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,57 +47,76 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         setContentView(R.layout.activity_main);
-        Button btEmpezar = findViewById(R.id.bt_main_empezar);
+        btEmpezar = findViewById(R.id.bt_main_empezar);
         btEmpezar.setOnClickListener(this::empezar);
+
         ///////////////////////////////////////////////////
-        surfaceView = findViewById(R.id.surfaceView);
+        SurfaceView surfaceView = findViewById(R.id.surfaceView);
         surfaceView.getHolder().addCallback(this);
 
-        // Inicia el hilo de juego y pasa el SurfaceHolder del SurfaceView
-        hilosFormas = new HilosFormas(surfaceView.getHolder());
+        gameThread = new GameThread(surfaceView.getHolder());
+        //////////////////////////////////////////////////////
+        /*
+        executor = Executors.newFixedThreadPool(3);
+
+        eslogan = findViewById(R.id.tv_main_eslogan);
+        eslogan.setOnClickListener(this::animador);
+        logotipo = findViewById(R.id.iv_main_logo);
+        logotipo.setOnClickListener(this::animador);
+         */
+
+        executor = Executors.newFixedThreadPool(3);
+
+        eslogan = findViewById(R.id.tv_main_eslogan);
+        logotipo = findViewById(R.id.iv_main_logo);
+
+        // Inicia las animaciones al crear la actividad
+        animador(eslogan);
+        animador(logotipo);
+        animador(btEmpezar);
+
     }
+
+    public void animador(View v) {
+        int id = v.getId();
+        View view;
+        Animation animation;
+
+        if (id == R.id.bt_main_empezar) {
+            view = btEmpezar;
+            animation = AnimationUtils.loadAnimation(this, R.anim.fundido);
+        } else if (id == R.id.tv_main_eslogan) {
+            view = eslogan;
+            animation = AnimationUtils.loadAnimation(this, R.anim.slide);
+        } else if (id == R.id.iv_main_logo) {
+            view = logotipo;
+            animation = AnimationUtils.loadAnimation(this, R.anim.scale_up_down);
+        } else {
+            animation = null;
+            view = null;
+        }
+
+        // Ejecutamos las animaciones en hilos secundarios
+        // Para comunicarnos con el UIThread usamos el método post de la vista
+        if (view != null)
+            executor.execute(() -> view.post(() -> view.startAnimation(animation)));
+    }
+
     private void empezar(View v){
         Intent aListado = new Intent(this, ListadoTareasActivity.class);
         startActivity(aListado);
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        hilosFormas.setRunning(false);
-        // Espera a que el hilo termine
-        try {
-            hilosFormas.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         establecerFuente();
-
-        // Verifica que hilosFormas no sea nulo antes de intentar reiniciar hilosFormas
-        if (hilosFormas != null) {
-            // Detén el hilo antes de crear uno nuevo
-            hilosFormas.setRunning(false);
-            try {
-                hilosFormas.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     //////////////////////////////////////////////////////
     @Override
-    public void surfaceCreated(@NonNull SurfaceHolder holder)
-    {
-        if (surfaceView != null) {
-            hilosFormas = new HilosFormas(surfaceView.getHolder());
-            hilosFormas.start();
-        }
+    public void surfaceCreated(@NonNull SurfaceHolder holder) {
+        gameThread.start();
     }
 
     @Override
@@ -98,9 +127,9 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     @Override
     public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
         // Detiene el hilo cuando la superficie es destruida
-        hilosFormas.setRunning(false);
+        gameThread.setRunning(false);
         try {
-            hilosFormas.join();
+            gameThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -138,13 +167,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             theme.applyStyle(R.style.Theme_TrassTarea, true);
         }
         return theme;
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        // Detén el hilo de juego cuando la actividad se destruye
-        hilosFormas.setRunning(false);
     }
 
 }
