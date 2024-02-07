@@ -6,9 +6,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -133,9 +135,10 @@ public class FragmentoDos extends Fragment {
         ImageButton ibDoc = view.findViewById(R.id.ib_f2_documento);
         ibDoc.setOnClickListener(this::escuchadorBotonesArchivos);
 
+        /////////////////////////////////////
         ImageButton ibPic = view.findViewById(R.id.ib_f2_imagen);
-        ibPic.setOnClickListener(this::escuchadorBotonesArchivos);
-
+        ibPic.setOnClickListener(v -> tomarFoto());
+        /////////////////////////////////////
         ImageButton ibAud = view.findViewById(R.id.ib_f2_audio);
         ibAud.setOnClickListener(this::escuchadorBotonesArchivos);
 
@@ -178,6 +181,114 @@ public class FragmentoDos extends Fragment {
         });
     }
 
+    private void tomarFoto() {
+        // Intent para capturar una foto
+        Intent tomarFotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Lanzador para iniciar la actividad de captura de foto
+        lanzadorCamara.launch(tomarFotoIntent);
+    }
+    //////////////////////////////////////////////////////////////////////
+    ActivityResultLauncher<Intent> lanzadorCamara = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        // La foto se ha capturado exitosamente
+                        Intent data = result.getData();
+                        if (data != null && data.getExtras() != null && data.getExtras().containsKey("data")) {
+                            // La imagen capturada está como un extra en el intent bajo la clave "data"
+                            Bitmap imagenCapturada = (Bitmap) data.getExtras().get("data");
+                            // Guardar la imagen capturada como un archivo y obtener su URI
+                            Uri uriImagenCapturada = guardarImagenComoArchivo(requireContext(), imagenCapturada);
+                            // Guardar la URI del archivo en el ViewModel
+                            tareaViewModel.setRutaImagen(uriImagenCapturada.toString());
+                        }
+                    }
+                }
+            }
+    );
+
+    /*
+    private Uri guardarImagenComoArchivo(Context context, Bitmap imagen) {
+        OutputStream fos = null;
+        File archivoImagen = null;
+        try {
+            // Crear un archivo temporal en el directorio de imágenes de la aplicación
+            archivoImagen = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "imagen_temporal.jpg");
+            fos = new FileOutputStream(archivoImagen);
+            // Guardar la imagen en el archivo
+            imagen.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        // Devolver la URI del archivo
+        return (archivoImagen != null) ? Uri.fromFile(archivoImagen) : null;
+    }
+     */
+    private Uri guardarImagenComoArchivo(Context context, Bitmap imagen) {
+        OutputStream fos = null;
+        File archivoImagen = null;
+        try {
+            // Leemos la preferencia de usuario sobre el almacenamiento
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+            boolean sd = sharedPreferences.getBoolean("sd", false);
+
+            // Establecemos el directorio de almacenamiento
+            String directorio = context.getFilesDir().getAbsolutePath();
+            if (sd) {
+                // Si el almacenamiento externo está disponible, guardamos en la tarjeta SD
+                if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+                    File[] directorios = getExternalFilesDirs(context, null);
+                    // directorios[1] apunta al directorio privado en la tarjeta SD
+                    File directorioExterno = directorios[1];
+                    directorio = directorioExterno.getAbsolutePath();
+                } else {
+                    // Si la tarjeta SD no está disponible, mostramos un mensaje y guardamos en el almacenamiento interno
+                    Toast.makeText(context, R.string.dialog_f2_sd_not_mounted, Toast.LENGTH_SHORT).show();
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putBoolean("sd", false);
+                    editor.apply();
+                }
+            }
+
+            // Creamos un nombre único para el archivo de imagen
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+            String nombreArchivo = "imagen_" + timeStamp + ".jpg";
+
+            // Creamos el archivo en el directorio correspondiente
+            archivoImagen = new File(directorio, nombreArchivo);
+            fos = new FileOutputStream(archivoImagen);
+
+            // Guardamos la imagen en el archivo
+            imagen.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
+
+            // Devolvemos la URI del archivo
+            return Uri.fromFile(archivoImagen);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+    /////////////////////////////////////////////////////////////////////////
     //Método para guardar el estado del formulario en un Bundle
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {

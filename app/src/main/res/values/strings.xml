@@ -112,4 +112,6 @@
     <string name="toast_f2_storage_ok">Archivo copiado correctamente</string>
     <string name="tv_f2_not_present">No presente</string>
     <string name="toast_list_no_repository">No ha sido posible conectar con base de datos externa</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

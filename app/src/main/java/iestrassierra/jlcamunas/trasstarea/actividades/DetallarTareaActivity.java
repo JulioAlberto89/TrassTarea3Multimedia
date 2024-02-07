@@ -1,5 +1,7 @@
 package iestrassierra.jlcamunas.trasstarea.actividades;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -8,6 +10,7 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
 import java.io.File;
 
@@ -50,6 +53,14 @@ public class DetallarTareaActivity extends AppCompatActivity {
         TextView tv_detallar_imagen = findViewById(R.id.tv_detallar_imagen);
         tv_detallar_imagen.setText(rutaANombre(tareaDetalle.getRutaImagen()));
 
+        // Agregar OnClickListener para abrir la imagen
+        tv_detallar_imagen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                abrirFoto(tareaDetalle.getRutaImagen());
+            }
+        });
+
         TextView tv_detallar_audio = findViewById(R.id.tv_detallar_audio);
         tv_detallar_audio.setText(rutaANombre(tareaDetalle.getRutaAudio()));
 
@@ -72,4 +83,13 @@ public class DetallarTareaActivity extends AppCompatActivity {
         }else
             return getString(R.string.tv_f2_not_present);
     }
+
+    private void abrirFoto(String rutaFoto) {
+        // Crear un intent para abrir la actividad de la foto
+        Intent intent = new Intent(this, AbrirFotoActivity.class);
+        // Pasar la ruta de la foto como datos en el intent
+        intent.setData(Uri.parse("file://" + rutaFoto));
+        startActivity(intent);
+    }
+
 }

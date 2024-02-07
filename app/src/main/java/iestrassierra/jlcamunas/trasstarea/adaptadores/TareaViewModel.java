@@ -1,5 +1,7 @@
 package iestrassierra.jlcamunas.trasstarea.adaptadores;
 
+import android.net.Uri;
+
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -12,6 +14,9 @@ public class TareaViewModel extends ViewModel {
     private final MutableLiveData<Integer> progreso = new MutableLiveData<>();
     private final MutableLiveData<Boolean> prioritaria = new MutableLiveData<>();
     private final MutableLiveData<String> descripcion = new MutableLiveData<>();
+
+    private final MutableLiveData<Uri> uriImagen = new MutableLiveData<>();
+
 
     private final MutableLiveData<String> rutaDocumento = new MutableLiveData<>();
     private final MutableLiveData<String> rutaImagen = new MutableLiveData<>();
@@ -97,5 +102,14 @@ public class TareaViewModel extends ViewModel {
     }
     public void setRutaVideo(String rutaVideo) {
         this.rutaVideo.setValue(rutaVideo);
+    }
+
+    // Métodos getter y setter para la Uri de la imagen
+    public MutableLiveData<Uri> getUriImagen() {
+        return uriImagen;
+    }
+
+    public void setUriImagen(Uri uriImagen) {
+        this.uriImagen.setValue(uriImagen);
     }
 }
