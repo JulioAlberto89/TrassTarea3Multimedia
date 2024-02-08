@@ -2,6 +2,7 @@ package iestrassierra.jlcamunas.trasstarea.actividades;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -22,7 +23,7 @@ public class ReproducirAudioActivity extends AppCompatActivity {
     private boolean bucle = false;
     private int posicion = 0;
 
-    private Button play, pause, resume, stop, loop;
+    private Button play, pause, resume, stop, loop, volver;
     private SeekBar seekBar;
 
     @Override
@@ -39,6 +40,15 @@ public class ReproducirAudioActivity extends AppCompatActivity {
         stop = findViewById(R.id.btn_parar);
         loop = findViewById(R.id.btn_bucle);
         seekBar = findViewById(R.id.seekBar);
+        volver = findViewById(R.id.btnVolver);
+        volver.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Crear un intent para ir a la actividad destino
+                Intent intent = new Intent(ReproducirAudioActivity.this, ListadoTareasActivity.class);
+                startActivity(intent);
+            }
+        });
         play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
