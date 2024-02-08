@@ -140,10 +140,10 @@ public class FragmentoDos extends Fragment {
         ibPic.setOnClickListener(v -> tomarFoto());
         /////////////////////////////////////
         ImageButton ibAud = view.findViewById(R.id.ib_f2_audio);
-        ibAud.setOnClickListener(this::escuchadorBotonesArchivos);
+        ibAud.setOnClickListener(v -> grabarAudio());
 
         ImageButton ibVid = view.findViewById(R.id.ib_f2_video);
-        ibVid.setOnClickListener(v -> grabarVideo());
+        ibVid.setOnClickListener(a -> grabarVideo());
 
         //Binding y config boton Volver
         Button btVolver = view.findViewById(R.id.bt_f2_volver);
@@ -192,6 +192,11 @@ public class FragmentoDos extends Fragment {
         Intent grabarVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
         lanzadorCamaraVideo.launch(grabarVideoIntent);
     }
+
+    private void grabarAudio(){
+        Intent grabarAudioIntent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+        lanzadorGrabadoraAudio.launch(grabarAudioIntent);
+    }
     //////////////////////////////////////////////////////////////////////
     ActivityResultLauncher<Intent> lanzadorCamara = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -235,7 +240,30 @@ public class FragmentoDos extends Fragment {
                 }
             }
     );
-///////////////////////////////GUARDAR IMAGEN/////////////////////////////////////////////
+
+    ActivityResultLauncher<Intent> lanzadorGrabadoraAudio = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        // La grabación de audio se realizó con éxito
+                        Intent data = result.getData();
+                        if (data != null) {
+                            Uri audioUri = data.getData();
+                            if (audioUri != null) {
+                                // Guardar el audio grabado como un archivo y obtener su URI
+                                Uri uriAudioGrabado = guardarAudioComoArchivo(requireContext(), audioUri);
+                                // Guardar la URI del archivo en el ViewModel
+                                tareaViewModel.setRutaAudio(uriAudioGrabado.toString());
+                            }
+                        }
+                    }
+                }
+            }
+    );
+
+    ///////////////////////////////GUARDAR IMAGEN/////////////////////////////////////////////
     private Uri guardarImagenComoArchivo(Context context, Bitmap imagen) {
         OutputStream fos = null;
         File archivoImagen = null;
@@ -352,6 +380,70 @@ public class FragmentoDos extends Fragment {
         }
         return null;
     }
+
+    private Uri guardarAudioComoArchivo(Context context, Uri audioUri) {
+        InputStream is = null;
+        OutputStream fos = null;
+        File archivoAudio = null;
+        try {
+            // Leemos la preferencia de usuario sobre el almacenamiento
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+            boolean sd = sharedPreferences.getBoolean("sd", false);
+
+            // Establecemos el directorio de almacenamiento
+            String directorio = context.getFilesDir().getAbsolutePath();
+            if (sd) {
+                // Si el almacenamiento externo está disponible, guardamos en la tarjeta SD
+                if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+                    File[] directorios = context.getExternalFilesDirs(null);
+                    // directorios[1] apunta al directorio privado en la tarjeta SD
+                    File directorioExterno = directorios[1];
+                    directorio = directorioExterno.getAbsolutePath();
+                } else {
+                    // Si la tarjeta SD no está disponible, mostramos un mensaje y guardamos en el almacenamiento interno
+                    Toast.makeText(context, R.string.dialog_f2_sd_not_mounted, Toast.LENGTH_SHORT).show();
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putBoolean("sd", false);
+                    editor.apply();
+                }
+            }
+
+            // Creamos un nombre único para el archivo de audio
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+            String nombreArchivo = "audio_" + timeStamp + ".mp3";
+
+            // Creamos el archivo en el directorio correspondiente
+            archivoAudio = new File(directorio, nombreArchivo);
+            fos = new FileOutputStream(archivoAudio);
+            is = context.getContentResolver().openInputStream(audioUri);
+
+            // Copiamos el contenido del audio en el archivo
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = is.read(buffer)) > 0) {
+                fos.write(buffer, 0, length);
+            }
+            fos.flush();
+
+            // Devolvemos la URI del archivo
+            return Uri.fromFile(archivoAudio);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (is != null) {
+                    is.close();
+                }
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
 
     /////////////////////////////////////////////////////////////////////////
     //Método para guardar el estado del formulario en un Bundle

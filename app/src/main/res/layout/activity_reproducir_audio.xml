@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:text="Reproductor de audio"
+        android:textSize="34sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btn_reproducir"
+        android:layout_width="65dp"
+        android:layout_height="70dp"
+        android:layout_marginTop="70dp"
+        app:icon="@drawable/baseline_play_circle_24"
+        app:layout_constraintEnd_toStartOf="@+id/btn_pausar"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+    <Button
+        android:id="@+id/btn_pausar"
+        android:layout_width="65dp"
+        android:layout_height="70dp"
+        app:icon="@drawable/baseline_pause_circle_filled_24"
+        app:layout_constraintEnd_toStartOf="@+id/btn_reanudar"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/btn_reproducir"
+        app:layout_constraintTop_toTopOf="@+id/btn_reproducir" />
+
+    <Button
+        android:id="@+id/btn_reanudar"
+        android:layout_width="65dp"
+        android:layout_height="70dp"
+        app:icon="@drawable/baseline_refresh_24"
+        app:layout_constraintEnd_toStartOf="@+id/btn_parar"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/btn_pausar"
+        app:layout_constraintTop_toTopOf="@+id/btn_pausar" />
+
+    <Button
+        android:id="@+id/btn_parar"
+        android:layout_width="65dp"
+        android:layout_height="70dp"
+        app:icon="@drawable/ic_launcher_foreground"
+        app:layout_constraintEnd_toStartOf="@+id/btn_bucle"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/btn_reanudar"
+        app:layout_constraintTop_toTopOf="@+id/btn_reanudar" />
+
+    <Button
+        android:id="@+id/btn_bucle"
+        android:layout_width="65dp"
+        android:layout_height="70dp"
+        app:icon="@drawable/baseline_loop_24"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/btn_parar"
+        app:layout_constraintTop_toTopOf="@+id/btn_parar" />
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:max="100"
+        android:progress="0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_reanudar" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

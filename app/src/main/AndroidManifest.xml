@@ -15,6 +15,9 @@
         android:theme="@style/Theme.TrassTarea"
         tools:targetApi="34">
         <activity
+            android:name=".actividades.ReproducirAudioActivity"
+            android:exported="false" />
+        <activity
             android:name=".actividades.AbrirVideoActivity"
             android:exported="false" />
         <activity
