@@ -143,7 +143,7 @@ public class FragmentoDos extends Fragment {
         ibAud.setOnClickListener(this::escuchadorBotonesArchivos);
 
         ImageButton ibVid = view.findViewById(R.id.ib_f2_video);
-        ibVid.setOnClickListener(this::escuchadorBotonesArchivos);
+        ibVid.setOnClickListener(v -> grabarVideo());
 
         //Binding y config boton Volver
         Button btVolver = view.findViewById(R.id.bt_f2_volver);
@@ -187,6 +187,11 @@ public class FragmentoDos extends Fragment {
         // Lanzador para iniciar la actividad de captura de foto
         lanzadorCamara.launch(tomarFotoIntent);
     }
+
+    private void grabarVideo(){
+        Intent grabarVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+        lanzadorCamaraVideo.launch(grabarVideoIntent);
+    }
     //////////////////////////////////////////////////////////////////////
     ActivityResultLauncher<Intent> lanzadorCamara = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -209,32 +214,28 @@ public class FragmentoDos extends Fragment {
             }
     );
 
-    /*
-    private Uri guardarImagenComoArchivo(Context context, Bitmap imagen) {
-        OutputStream fos = null;
-        File archivoImagen = null;
-        try {
-            // Crear un archivo temporal en el directorio de imágenes de la aplicación
-            archivoImagen = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "imagen_temporal.jpg");
-            fos = new FileOutputStream(archivoImagen);
-            // Guardar la imagen en el archivo
-            imagen.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-            fos.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (fos != null) {
-                    fos.close();
+    ActivityResultLauncher<Intent> lanzadorCamaraVideo = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult o) {
+                    if (o.getResultCode() == Activity.RESULT_OK) {
+                        // El vídeo se ha capturado exitosamente
+                        Intent data = o.getData();
+                        if (data != null) {
+                            Uri videoUri = data.getData();
+                            if (videoUri != null) {
+                                // Guardar el vídeo capturado como un archivo y obtener su URI
+                                Uri uriVideoCapturado = guardarVideoComoArchivo(requireContext(), videoUri);
+                                // Guardar la URI del archivo en el ViewModel
+                                tareaViewModel.setRutaVideo(uriVideoCapturado.toString());
+                            }
+                        }
+                    }
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-        }
-        // Devolver la URI del archivo
-        return (archivoImagen != null) ? Uri.fromFile(archivoImagen) : null;
-    }
-     */
+    );
+///////////////////////////////GUARDAR IMAGEN/////////////////////////////////////////////
     private Uri guardarImagenComoArchivo(Context context, Bitmap imagen) {
         OutputStream fos = null;
         File archivoImagen = null;
@@ -288,6 +289,70 @@ public class FragmentoDos extends Fragment {
         }
         return null;
     }
+    /////////////////////////////////////////////////////////////////////////
+    private Uri guardarVideoComoArchivo(Context context, Uri videoUri) {
+        InputStream is = null;
+        OutputStream fos = null;
+        File archivoVideo = null;
+        try {
+            // Leemos la preferencia de usuario sobre el almacenamiento
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+            boolean sd = sharedPreferences.getBoolean("sd", false);
+
+            // Establecemos el directorio de almacenamiento
+            String directorio = context.getFilesDir().getAbsolutePath();
+            if (sd) {
+                // Si el almacenamiento externo está disponible, guardamos en la tarjeta SD
+                if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+                    File[] directorios = context.getExternalFilesDirs(null);
+                    // directorios[1] apunta al directorio privado en la tarjeta SD
+                    File directorioExterno = directorios[1];
+                    directorio = directorioExterno.getAbsolutePath();
+                } else {
+                    // Si la tarjeta SD no está disponible, mostramos un mensaje y guardamos en el almacenamiento interno
+                    Toast.makeText(context, R.string.dialog_f2_sd_not_mounted, Toast.LENGTH_SHORT).show();
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putBoolean("sd", false);
+                    editor.apply();
+                }
+            }
+
+            // Creamos un nombre único para el archivo de vídeo
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+            String nombreArchivo = "video_" + timeStamp + ".mp4";
+
+            // Creamos el archivo en el directorio correspondiente
+            archivoVideo = new File(directorio, nombreArchivo);
+            fos = new FileOutputStream(archivoVideo);
+            is = context.getContentResolver().openInputStream(videoUri);
+
+            // Copiamos el contenido del vídeo en el archivo
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = is.read(buffer)) > 0) {
+                fos.write(buffer, 0, length);
+            }
+            fos.flush();
+
+            // Devolvemos la URI del archivo
+            return Uri.fromFile(archivoVideo);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (is != null) {
+                    is.close();
+                }
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
     /////////////////////////////////////////////////////////////////////////
     //Método para guardar el estado del formulario en un Bundle
     @Override

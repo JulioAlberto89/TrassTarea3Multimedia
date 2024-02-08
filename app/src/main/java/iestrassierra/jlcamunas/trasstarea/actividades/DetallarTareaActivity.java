@@ -66,6 +66,12 @@ public class DetallarTareaActivity extends AppCompatActivity {
 
         TextView tv_detallar_video = findViewById(R.id.tv_detallar_video);
         tv_detallar_video.setText(rutaANombre(tareaDetalle.getRutaVideo()));
+        tv_detallar_video.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                abrirVideo(tareaDetalle.getRutaVideo());
+            }
+        });
 
         //Control del botón volver
         Button btDetallarVolver = findViewById(R.id.bt_detallar_cerrar);
@@ -89,6 +95,14 @@ public class DetallarTareaActivity extends AppCompatActivity {
         Intent intent = new Intent(this, AbrirFotoActivity.class);
         // Pasar la ruta de la foto como datos en el intent
         intent.setData(Uri.parse("file://" + rutaFoto));
+        startActivity(intent);
+    }
+
+    private void abrirVideo(String rutaVideo) {
+        // Crear un intent para abrir la actividad de reproducción de vídeo
+        Intent intent = new Intent(this, AbrirVideoActivity.class);
+        // Pasar la ruta del vídeo como datos en el intent
+        intent.setData(Uri.parse("file://" + rutaVideo));
         startActivity(intent);
     }
 
