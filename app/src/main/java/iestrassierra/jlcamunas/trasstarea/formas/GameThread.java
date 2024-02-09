@@ -24,7 +24,7 @@ public class GameThread extends Thread {
         this.surfaceHolder = surfaceHolder;
         shapes = new ArrayList<>();
 
-        // Crea 3 círculos, 3 cuadrados, 3 triángulos y 3 estrellas
+        // Aquí se crean 3 círculos, 3 cuadrados, 3 triángulos y 3 estrellas
         for (int i = 0; i < 3; i++) {
             shapes.add(new Shape(getRandomX(surfaceHolder.getSurfaceFrame().right),
                     getRandomY(surfaceHolder.getSurfaceFrame().bottom),

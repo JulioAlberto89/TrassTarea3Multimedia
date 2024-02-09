@@ -138,7 +138,7 @@ public class FragmentoDos extends Fragment {
         /////////////////////////////////////
         ImageButton ibPic = view.findViewById(R.id.ib_f2_imagen);
         ibPic.setOnClickListener(v -> tomarFoto());
-        /////////////////////////////////////
+
         ImageButton ibAud = view.findViewById(R.id.ib_f2_audio);
         ibAud.setOnClickListener(v -> grabarAudio());
 
