@@ -55,5 +55,6 @@ dependencies {
     //Conexión con BD externa
     implementation(files("libs/mysql-connector-java-5.1.48-bin.jar"))
     //implementation("mysql:mysql-connector-java:8.0.23")
+    implementation ("com.dmitryborodin:pdfview-android:1.1.0")
 
 }

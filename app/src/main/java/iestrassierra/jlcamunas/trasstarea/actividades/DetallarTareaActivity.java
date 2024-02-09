@@ -50,6 +50,13 @@ public class DetallarTareaActivity extends AppCompatActivity {
         TextView tv_detallar_documento = findViewById(R.id.tv_detallar_documento);
         tv_detallar_documento.setText(rutaANombre(tareaDetalle.getRutaDocumento()));
 
+        tv_detallar_documento.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                abrirDocumento(tareaDetalle.getRutaDocumento());
+            }
+        });
+
         TextView tv_detallar_imagen = findViewById(R.id.tv_detallar_imagen);
         tv_detallar_imagen.setText(rutaANombre(tareaDetalle.getRutaImagen()));
 
@@ -117,6 +124,14 @@ public class DetallarTareaActivity extends AppCompatActivity {
         Intent intent = new Intent(this, ReproducirAudioActivity.class);
         // Pasar la ruta del vídeo como datos en el intent
         intent.setData(Uri.parse("file://" + rutaAudio));
+        startActivity(intent);
+    }
+
+    private void abrirDocumento(String rutaDocumento) {
+        // Crear un intent para abrir la actividad de reproducción de audio
+        Intent intent = new Intent(this, AbrirDocumentoActivity.class);
+        // Pasar la ruta del vídeo como datos en el intent
+        intent.setData(Uri.parse("file://" + rutaDocumento));
         startActivity(intent);
     }
 
