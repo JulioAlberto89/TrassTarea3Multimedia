@@ -197,7 +197,7 @@ public class FragmentoDos extends Fragment {
         Intent grabarAudioIntent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
         lanzadorGrabadoraAudio.launch(grabarAudioIntent);
     }
-    //////////////////////////////////////////////////////////////////////
+    ////////////////////////////////LAUNCHER DE DISPOSITVOS MULTIMEDIA//////////////////////////////////////
     ActivityResultLauncher<Intent> lanzadorCamara = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
@@ -317,7 +317,7 @@ public class FragmentoDos extends Fragment {
         }
         return null;
     }
-    /////////////////////////////////////////////////////////////////////////
+    //////////////////////////////GUARDAR VÍDEO///////////////////////////////////////////
     private Uri guardarVideoComoArchivo(Context context, Uri videoUri) {
         InputStream is = null;
         OutputStream fos = null;
@@ -381,6 +381,7 @@ public class FragmentoDos extends Fragment {
         return null;
     }
 
+    ////////////////////////////////GRABAR AUDIO//////////////////////////////////
     private Uri guardarAudioComoArchivo(Context context, Uri audioUri) {
         InputStream is = null;
         OutputStream fos = null;
