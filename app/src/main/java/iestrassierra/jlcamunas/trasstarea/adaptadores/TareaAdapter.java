@@ -8,6 +8,8 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -19,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
 import iestrassierra.jlcamunas.trasstarea.R;
+import iestrassierra.jlcamunas.trasstarea.actividades.ListadoTareasActivity;
 import iestrassierra.jlcamunas.trasstarea.modelo.entidades.Tarea;
 
 
@@ -52,6 +55,10 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TaskViewHold
         Tarea tarea = tasks.get(position);
         taskViewHolder.bind(tarea);
         taskViewHolder.itemView.setTag(tarea); //Adjuntamos la tarea en la vista del ViewHolder
+
+        // Aplicar la animación deseada a la vista
+        Animation animation = AnimationUtils.loadAnimation(taskViewHolder.itemView.getContext(), R.anim.slide);
+        taskViewHolder.itemView.startAnimation(animation);
     }
 
     @Override

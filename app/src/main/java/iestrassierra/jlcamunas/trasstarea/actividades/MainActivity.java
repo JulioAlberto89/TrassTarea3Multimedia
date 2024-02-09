@@ -56,15 +56,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         gameThread = new GameThread(surfaceView.getHolder());
         //////////////////////////////////////////////////////
-        /*
-        executor = Executors.newFixedThreadPool(3);
-
-        eslogan = findViewById(R.id.tv_main_eslogan);
-        eslogan.setOnClickListener(this::animador);
-        logotipo = findViewById(R.id.iv_main_logo);
-        logotipo.setOnClickListener(this::animador);
-         */
-
         executor = Executors.newFixedThreadPool(3);
 
         eslogan = findViewById(R.id.tv_main_eslogan);
